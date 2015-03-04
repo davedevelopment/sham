@@ -1,31 +1,31 @@
 <?php
 
-namespace Sham\TestDouble;
+namespace Sham\TestDouble\Api;
 
-interface CallArgumentVerifier extends CallCountVerifier 
+interface NegativeMethodCallExpectation 
 {
     /**
      * @param mixed $arg     The first expected argument
      * @param mixed $arg,... The subsequent expected arguments
      *
-     * @return CallCountVerifier
+     * @return void
      */
     function with($arg/*, $arg2..., $arg3...*/);
 
     /**
      * @param array $args The expected arguments
      *
-     * @return CallCountVerifier
+     * @return void
      */
     function withArgs(array $args);
 
     /**
-     * @return CallCountVerifier
+     * @return void
      */
     function withNoArgs();
 
     /**
-     * @return CallCountVerifier
+     * @return void
      */
     function withAnyArgs();
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Sham\TestDouble;
+namespace Sham\TestDouble\Api;
 
 interface Spy extends Stub
 {
