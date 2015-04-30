@@ -7,6 +7,11 @@ class Stub implements Api\Stub
     private $shouldIgnoreMissing = false;
     private $stubMethods = [];
 
+    public function __construct()
+    {
+
+    }
+
     /**
      * @param  string   $method   The method to stub
      * @return StubMethod
