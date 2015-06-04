@@ -1,0 +1,143 @@
+<?php
+
+namespace Sham\Test\TestDouble;
+
+use Sham\TestDouble\CallArgumentVerifier;
+use Sham\TestDouble\Api\CallCountVerifier;
+
+class CallArgumentVerifierTest extends \PHPUnit_Framework_TestCase
+{
+    public function basic_with()
+    {
+        return [
+            'basic test with one arg' => [
+                [['dummy_method', ['123']]],
+                ['123'],
+                true,
+            ],
+            'basic test with single incorrect arg' => [
+                [['dummy_method', ['123']]],
+                ['dave'],
+                false,
+            ],
+            'basic test with multiple arg' => [
+                [['dummy_method', ['123', false, 456]]],
+                ['123', false, 456],
+                true,
+            ],
+            'basic test with multiple incorrect arg' => [
+                [['dummy_method', ['123', false, 456]]],
+                ['dave', false, 456],
+                false,
+            ],
+            'basic test with multiple calls' => [
+                [
+                    ['dummy_method', ['456']],
+                    ['dummy_method', ['123']]
+                ],
+                ['123'],
+                true,
+            ],
+            'basic test with multiple calls and non-match' => [
+                [
+                    ['dummy_method', ['456']],
+                    ['dummy_method', ['123']]
+                ],
+                ['789'],
+                false,
+            ],
+            'with should not match on loose equivalence' => [
+                [['dummy_method', [123]]],
+                ['123'],
+                false,
+            ],
+        ];
+    }
+
+    /** 
+     * @test 
+     * @dataProvider basic_with
+     */
+    public function test_with($receivedCalls, $argsToCheck, $shouldSucceed)
+    {
+        $verifier = new CallArgumentVerifier($receivedCalls);
+
+        if (!$shouldSucceed) {
+            $this->setExpectedException("Exception");
+        }
+
+        call_user_func_array([$verifier, 'with'], $argsToCheck);
+    }      
+
+    /** 
+     * @test 
+     * @dataProvider basic_with
+     */
+    public function test_with_args($receivedCalls, $argsToCheck, $shouldSucceed)
+    {
+        $verifier = new CallArgumentVerifier($receivedCalls);
+
+        if (!$shouldSucceed) {
+            $this->setExpectedException("Exception");
+        }
+
+        $verifier->withArgs($argsToCheck);
+    }      
+
+    /** @test */
+    public function it_can_verify_no_args_where_passed()
+    {
+        $verifier = new CallArgumentVerifier([['dummy_method', []]]);
+
+        $verifier->withNoArgs();
+    }
+
+    /** @test */
+    public function it_can_verify_there_was_one_call_of_many_with_no_args()
+    {
+        $verifier = new CallArgumentVerifier([
+            ['dummy_method', ['123']],
+            ['dummy_method', []],
+            ['dummy_method', ['456']],
+        ]);
+
+        $verifier->withNoArgs();
+    }
+
+    /** @test */
+    public function it_throws_if_args_have_been_passed_when_they_shouldnt()
+    {
+        $verifier = new CallArgumentVerifier([['dummy_method', ['123']]]);
+
+        $this->setExpectedException("Exception");
+
+        $verifier->withNoArgs();
+    }
+
+    /** @test */
+    public function it_provides_fluent_interface()
+    {
+        $verifier = new CallArgumentVerifier([
+            ['dummy_method', ['123']],
+            ['dummy_method', []],
+        ]);
+
+        $this->assertInstanceOf(CallCountVerifier::class, $verifier->with('123'));
+        $this->assertInstanceOf(CallCountVerifier::class, $verifier->withArgs(['123']));
+        $this->assertInstanceOf(CallCountVerifier::class, $verifier->withNoArgs());
+        $this->assertInstanceOf(CallCountVerifier::class, $verifier->withAnyArgs());
+    }
+
+    /** @test */
+    public function it_can_verify_the_number_of_matching_calls()
+    {
+        $verifier = new CallArgumentVerifier([
+            ['dummy_method', ['123']],
+            ['dummy_method', ['123']],
+        ]);
+
+        $this->setExpectedException("Exception");
+
+        $verifier->with('123')->once();
+    }
+}

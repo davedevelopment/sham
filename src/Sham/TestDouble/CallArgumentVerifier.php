@@ -21,8 +21,18 @@ class CallArgumentVerifier implements CallArgumentVerifierApi
      */
     function with($arg/*, $arg2..., $arg3...*/)
     {
+        return $this->withArgs(func_get_args());
+    }
+
+    /**
+     * @param array $args The expected arguments
+     *
+     * @return CallCountVerifier
+     */
+    function withArgs(array $args)
+    {
         foreach ($this->calls as $call) {
-            if (func_get_args() == $call[1]) {
+            if ($args === $call[1]) {
                 return $this;
             }
         }
@@ -31,21 +41,20 @@ class CallArgumentVerifier implements CallArgumentVerifierApi
     }
 
     /**
-     * @param array $args The expected arguments
-     *
      * @return CallCountVerifier
      */
-    function withArgs(array $args) {}
+    function withNoArgs()
+    {
+        return $this->withArgs([]);
+    }
 
     /**
      * @return CallCountVerifier
      */
-    function withNoArgs() {}
-
-    /**
-     * @return CallCountVerifier
-     */
-    function withAnyArgs() {}
+    function withAnyArgs()
+    {
+        return $this;
+    }
 
     /**
      * @return void
