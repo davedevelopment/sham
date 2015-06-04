@@ -42,8 +42,17 @@ class Spy extends Stub implements SpyApi
      *
      * @return void
      */
-    function shouldNotHaveReceived($method, array $args = array())
+    function shouldNotHaveReceived($method, array $args = null)
     {
+        foreach ($this->methods as $call) {
+            if ($call[0] != $method) {
+                continue;
+            }
+
+            if ($args === null || $call[1] == $args) {
+                throw new \Exception();
+            }
+        } 
     }
 
     public function __call($methodName, $args)
