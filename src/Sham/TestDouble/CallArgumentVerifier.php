@@ -12,7 +12,7 @@ class CallArgumentVerifier implements CallArgumentVerifierApi
     {
         $this->calls = $calls;
     }
-    
+
     /**
      * @param mixed $arg     The first expected argument
      * @param mixed $arg,... The subsequent expected arguments
@@ -31,10 +31,10 @@ class CallArgumentVerifier implements CallArgumentVerifierApi
      */
     function withArgs(array $args)
     {
-        foreach ($this->calls as $call) {
-            if ($args === $call[1]) {
-                return $this;
-            }
+        $matches = $this->callsThatMatch($args);
+
+        if (!empty($matches)) {
+            return new static($matches);
         }
 
         throw new \Exception();
@@ -72,4 +72,21 @@ class CallArgumentVerifier implements CallArgumentVerifierApi
      * @return void
      */
     function times($count) {}
+
+
+    private function callsThatMatch(array $args)
+    {
+        return array_filter($this->calls, function ($call) use ($args) {
+            return $this->isMatch($call, $args);
+        });
+    }
+
+    private function isMatch(array $call, array $args)
+    {
+        if ($args === $call[1]) {
+            return true;
+        }
+
+        return false;
+    }
 }
