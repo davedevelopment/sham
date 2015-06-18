@@ -133,11 +133,56 @@ class CallArgumentVerifierTest extends \PHPUnit_Framework_TestCase
     {
         $verifier = new CallArgumentVerifier([
             ['dummy_method', ['123']],
+        ]);
+
+        $verifier->with('123')->once();
+    }
+
+    /** @test */
+    public function it_throws_if_the_number_of_calls_is_more_than_specified()
+    {
+        $verifier = new CallArgumentVerifier([
+            ['dummy_method', ['123']],
             ['dummy_method', ['123']],
         ]);
 
         $this->setExpectedException("Exception");
 
         $verifier->with('123')->once();
+    }
+
+    /** @test */
+    public function it_throws_if_the_number_of_calls_is_less_than_specified()
+    {
+        $verifier = new CallArgumentVerifier([
+            ['dummy_method', ['123']],
+        ]);
+
+        $this->setExpectedException("Exception");
+
+        $verifier->with('123')->twice();
+    }
+
+    /** @test */
+    public function it_can_verify_an_arbitrary_number_of_calls()
+    {
+        $verifier = new CallArgumentVerifier([
+            ['dummy_method', ['123']],
+            ['dummy_method', ['123']],
+            ['dummy_method', ['123']],
+            ['dummy_method', ['123']],
+        ]);
+
+        $verifier->with('123')->times(4);
+    }
+
+    /** @test */
+    public function it_throws_if_someone_tries_to_verify_less_than_one_call()
+    {
+        $verifier = new CallArgumentVerifier([]);
+
+        $this->setExpectedException("Exception");
+
+        $verifier->times(0);
     }
 }

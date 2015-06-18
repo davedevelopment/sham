@@ -59,20 +59,34 @@ class CallArgumentVerifier implements CallArgumentVerifierApi
     /**
      * @return void
      */
-    function once() {}
+    public function once()
+    {
+        return $this->times(1);
+    }
 
     /**
      * @return void
      */
-    function twice() {}
+    public function twice()
+    {
+        return $this->times(2);
+    }
 
     /**
      * @param int $count
      *
      * @return void
      */
-    function times($count) {}
+    public function times($count)
+    {
+        if ($count < 1) {
+            throw new \Exception("Cannot verify a call was not received");
+        }
 
+        if (count($this->calls) !== $count) {
+            throw new \Exception();
+        }
+    }
 
     private function callsThatMatch(array $args)
     {
