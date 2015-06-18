@@ -4,6 +4,7 @@ namespace Sham\Test\TestDouble;
 
 use Sham\TestDouble\CallArgumentVerifier;
 use Sham\TestDouble\Api\CallCountVerifier;
+use PHPUnit_Framework_Constraint_IsType;
 
 class CallArgumentVerifierTest extends \PHPUnit_Framework_TestCase
 {
@@ -184,5 +185,15 @@ class CallArgumentVerifierTest extends \PHPUnit_Framework_TestCase
         $this->setExpectedException("Exception");
 
         $verifier->times(0);
+    }
+
+    /** @test */
+    public function it_can_verify_calls_based_on_phpunit_constraints()
+    {
+        $verifier = new CallArgumentVerifier([
+            ['dummy_method', ['123']],
+        ]);
+
+        $verifier->with(new PHPUnit_Framework_Constraint_IsType("string"));
     }
 }
