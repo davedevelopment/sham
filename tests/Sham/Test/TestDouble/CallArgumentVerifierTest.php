@@ -196,4 +196,57 @@ class CallArgumentVerifierTest extends \PHPUnit_Framework_TestCase
 
         $verifier->with(new PHPUnit_Framework_Constraint_IsType("string"));
     }
+
+    /** @test */
+    public function it_throws_if_a_phpunit_constraint_does_not_match()
+    {
+        $verifier = new CallArgumentVerifier([
+            ['dummy_method', [123]],
+        ]);
+
+        $this->setExpectedException("Exception");
+        $verifier->with(new PHPUnit_Framework_Constraint_IsType("string"));
+    }
+    /** @test */
+    public function it_throws_if_theres_not_a_match_even_with_a_phpunit_positive_match()
+    {
+        $verifier = new CallArgumentVerifier([
+            ['dummy_method', ['123', 123]],
+        ]);
+
+        $this->setExpectedException("Exception");
+        $verifier->with(new PHPUnit_Framework_Constraint_IsType("string"), 456);
+    }
+
+    /** @test */
+    public function it_can_verify_calls_based_on_hamcrest_constraints()
+    {
+        $verifier = new CallArgumentVerifier([
+            ['dummy_method', ['123']],
+        ]);
+
+        $verifier->with(stringValue("string"));
+    }
+
+    /** @test */
+    public function it_throws_if_a_hamcreset_constraint_does_not_match()
+    {
+        $verifier = new CallArgumentVerifier([
+            ['dummy_method', [123]],
+        ]);
+
+        $this->setExpectedException("Exception");
+        $verifier->with(stringValue("string"));
+    }
+
+    /** @test */
+    public function it_throws_if_theres_not_a_match_even_with_a_hamcreset_positive_match()
+    {
+        $verifier = new CallArgumentVerifier([
+            ['dummy_method', ['123', 123]],
+        ]);
+
+        $this->setExpectedException("Exception");
+        $verifier->with(stringValue("string"), 456);
+    }
 }

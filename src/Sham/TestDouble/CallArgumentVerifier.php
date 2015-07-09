@@ -95,12 +95,29 @@ class CallArgumentVerifier implements CallArgumentVerifierApi
         });
     }
 
-    private function isMatch(array $call, array $args)
+    private function isMatch(array $call, array $expectedArgs)
     {
-        if ($args === $call[1]) {
-            return true;
+        $actual = $call[1];
+
+        if (count($actual) !== count($expectedArgs)) {
+            return false;
         }
 
-        return false;
+        foreach ($expectedArgs as $i => $expectedArg) {
+
+            if ($expectedArg instanceof \PHPUnit_Framework_Constraint) {
+                if (!(new PHPUnitMatcher($expectedArg))->matches($actual[$i])) {
+                    return false;
+                }
+            } else if ($expectedArg instanceof \Hamcrest\Matcher) {
+                if (!(new HamcrestMatcher($expectedArg))->matches($actual[$i])) {
+                    return false;
+                }
+            } else if ($expectedArg !== $actual[$i]) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
