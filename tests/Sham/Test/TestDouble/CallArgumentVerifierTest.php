@@ -211,11 +211,30 @@ class CallArgumentVerifierTest extends \PHPUnit_Framework_TestCase
     public function it_throws_if_theres_not_a_match_even_with_a_phpunit_positive_match()
     {
         $verifier = new CallArgumentVerifier([
-            ['dummy_method', ['123', 123]],
+            ['dummy_method', [123]],
+            ['dummy_method', [456]],
         ]);
 
-        $this->setExpectedException("Exception");
-        $verifier->with(new PHPUnit_Framework_Constraint_IsType("string"), 456);
+        $expectedMessage = <<<EOS
+Couldn't verify this call was made
+
+    dummy_method(
+        <is of type "string">
+    )
+
+This method was called with:
+
+    dummy_method(
+        integer(123)
+    )
+
+    dummy_method(
+        integer(456)
+    )
+EOS;
+
+        $this->setExpectedException("Exception", $expectedMessage);
+        $verifier->with(new PHPUnit_Framework_Constraint_IsType("string"));
     }
 
     /** @test */
@@ -225,7 +244,7 @@ class CallArgumentVerifierTest extends \PHPUnit_Framework_TestCase
             ['dummy_method', ['123']],
         ]);
 
-        $verifier->with(stringValue("string"));
+        $verifier->with(stringValue());
     }
 
     /** @test */
@@ -233,10 +252,29 @@ class CallArgumentVerifierTest extends \PHPUnit_Framework_TestCase
     {
         $verifier = new CallArgumentVerifier([
             ['dummy_method', [123]],
+            ['dummy_method', [456]],
         ]);
 
-        $this->setExpectedException("Exception");
-        $verifier->with(stringValue("string"));
+        $expectedMessage = <<<EOS
+Couldn't verify this call was made
+
+    dummy_method(
+        <a string>
+    )
+
+This method was called with:
+
+    dummy_method(
+        integer(123)
+    )
+
+    dummy_method(
+        integer(456)
+    )
+EOS;
+
+        $this->setExpectedException("Exception", $expectedMessage);
+        $verifier->with(stringValue());
     }
 
     /** @test */
