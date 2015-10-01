@@ -37,37 +37,7 @@ class CallArgumentVerifier implements CallArgumentVerifierApi
             return new static($matches);
         }
 
-        /**
-         * TODO Push message formatting up the stack
-         */
-        $methodName = current($this->calls)[0];
-
-        $callFormatter = function ($call) {
-            $string = "    {$call[0]}(\n";
-            $argStrings = [];
-            foreach ($call[1] as $arg) {
-                if (is_object($arg) && $arg instanceof \Hamcrest\Core\IsTypeOf) {
-                    $argStrings[] = "<".(string) $arg.">";
-                } else if ($arg instanceof \PHPUnit_Framework_Constraint_IsType) {
-                    $argStrings[] = "<".$arg->toString().">";
-                } else {
-                    $argStrings[] = gettype($arg)."($arg)";
-                }
-            }
-
-            $string.= "        ".implode(",\n        ", $argStrings)."\n    )\n";
-
-            return $string;
-        };
-
-        $message = "Couldn't verify this call was made\n\n";
-        $message.= $callFormatter([$methodName, $args]);
-        $message.= "\nThis method was called with:\n\n";
-        foreach ($this->calls as $call) {
-            $message.= $callFormatter($call)."\n";
-        }
-
-        throw new \Exception($message);
+        throw new CouldNotVerifyCallWasMadeException($args, $this->calls);
     }
 
     /**
