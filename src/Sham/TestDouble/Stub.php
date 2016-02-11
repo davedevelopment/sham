@@ -4,6 +4,11 @@ namespace Sham\TestDouble;
 
 class Stub implements Api\Stub
 {
+    use StubTrait;
+}
+
+trait StubTrait
+{
     private $shouldIgnoreMissing = false;
     private $stubMethods = [];
 
