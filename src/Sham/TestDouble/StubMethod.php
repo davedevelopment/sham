@@ -6,8 +6,7 @@ class StubMethod implements Api\StubMethod
 {
     private $returnValue;
     private $name;
-    private $args = [];
-    private $anyArgs = false;
+    private $args;
 
     public function __construct($name)
     {
@@ -44,6 +43,8 @@ class StubMethod implements Api\StubMethod
      */
     public function withNoArgs()
     {
+        $this->args = [];
+
         return $this;
     }
 
@@ -52,7 +53,7 @@ class StubMethod implements Api\StubMethod
      */
     public function withAnyArgs()
     {
-        $this->anyArgs = true;
+        $this->args = null;
 
         return $this;
     }
@@ -70,11 +71,11 @@ class StubMethod implements Api\StubMethod
      */
     public function matches($methodName, $args)
     {
-        if ($this->name === $methodName && $this->args == $args) {
+        if (null === $this->args && $this->name === $methodName) {
             return true;
         }
 
-        if ($this->anyArgs && $this->name === $methodName) {
+        if ($this->name === $methodName && $this->args == $args) {
             return true;
         }
 
