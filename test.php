@@ -15,9 +15,19 @@ namespace Dave {
     use Sham\TestDouble\StubTrait;
     use Sham\TestDouble\Api\Stub;
 
-    class Thing 
+    abstract class Thing 
     {
         const DEFAULT_INT = 32;
+
+        public function __construct()
+        {
+            throw new \Exception();
+        }
+
+        public function __destruct()
+        {
+            throw new \Exception();
+        }
 
         public function foo(int $int = 123, \Foo\User $user = null, string $string = "12312312", bool $bool = true, float $float = 1.2, array $array = array()) : \Foo\User
         {
@@ -33,6 +43,22 @@ namespace Dave {
         {
             return "bas";
         }
+
+        private function fooPrivate()
+        {
+
+        }
+
+        protected function fooProtected()
+        {
+
+        }
+
+        abstract function fooAbstract();
+
+        final function fooFinal() 
+        {
+        }
     }
 
     function stub($class)
@@ -40,7 +66,11 @@ namespace Dave {
         $rfc = new \ReflectionClass($class);
         $methods = "";
 
-        foreach ($rfc->getMethods() as $method) {
+        $reflectionMethods = array_filter($rfc->getMethods(), function ($method) {
+            return !$method->isFinal() && !$method->isConstructor() && !$method->isDestructor();
+        });
+
+        foreach ($reflectionMethods as $method) {
 
             $paramArr = [];
             $params = $method->getParameters();
@@ -81,8 +111,14 @@ namespace Dave {
                 $returnType = ": $asString";
             }
 
+            $visibility = $method->isPrivate()
+                ? 'private'
+                : ($method->isProtected() 
+                    ? 'protected'
+                    : 'public');
+
             $methods.= <<<EOS
-            public function {$method->getName()}($paramsString)$returnType
+            {$visibility} function {$method->getName()}($paramsString)$returnType
             {
                 return call_user_func_array([\$this, '__call'], ['{$method->getName()}', func_get_args()]);
             }
@@ -99,6 +135,9 @@ EOS;
         {
             use StubTrait;
 
+            public function __construct() {}
+            public function __destruct() {}
+
             $methods
         };
 EOS;
@@ -109,6 +148,17 @@ EOS;
     $stub = stub(Thing::class);
 
     $stub->stub("foo")->toReturn(new \Foo\User());
+
+    $rm = new \ReflectionMethod($stub, "fooPrivate");
+    if (!$rm->isPrivate()) {
+        throw new \Exception("Stubs fooPrivate method should still be private");
+    }
+
+    $rm = new \ReflectionMethod($stub, "fooProtected");
+    if (!$rm->isProtected()) {
+        throw new \Exception("Stubs fooProtectd method should still be protected");
+    }
+
 
     if (!$stub instanceof Thing) {
         throw new \Exception("STUB WOULD NOT SATISFY TYPE HINT");
